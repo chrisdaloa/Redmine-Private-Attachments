@@ -1,0 +1,26 @@
+<%
+  project = attachments.first&.container&.project
+  can_view_private = project ? User.current.allowed_to?(:view_private_notes, project) : false
+  visible = attachments.reject { |a| a.private? && !can_view_private }
+%>
+<% if visible.any? %>
+<div class="attachments">
+  <% visible.each do |attachment| %>
+    <% next unless attachment.visible? %>
+    <p class="attachment">
+      <%= link_to_attachment attachment, :download => true, :class => 'icon icon-attachment' %>
+      <span class="size">(<%= number_to_human_size(attachment.filesize) %>)</span>
+      <% if attachment.description.present? %>
+        <span class="description"><%= attachment.description %></span>
+      <% end %>
+      <% if options[:deletable] %>
+        <%= link_to '', attachment_path(attachment),
+              :method => :delete,
+              :data => {:confirm => l(:text_are_you_sure)},
+              :title => l(:button_delete),
+              :class => 'icon-only icon-del' %>
+      <% end %>
+    </p>
+  <% end %>
+</div>
+<% end %>
