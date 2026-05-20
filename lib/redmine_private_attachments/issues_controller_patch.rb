@@ -12,13 +12,14 @@ module RedminePrivateAttachments
       return unless @issue&.persisted?
       return unless params.dig(:issue, :private_notes).to_s == '1'
 
-      # params[:attachments] is a hash { token => { filename, description } }
-      # where token == disk_filename, set by Redmine's AttachmentsController#upload.
-      tokens = params[:attachments].presence&.keys || []
-      return if tokens.empty?
+      # params[:attachments] is { "1" => { token: "#{id}.#{digest}", filename: ... }, ... }
+      # The token prefix is the attachment id, confirmed by Redmine's token format.
+      tokens = params[:attachments].presence&.values || []
+      attachment_ids = tokens.filter_map { |a| (a[:token] || a['token']).to_s.split('.').first.to_i.nonzero? }
+      return if attachment_ids.empty?
 
       Attachment
-        .where(disk_filename: tokens)
+        .where(id: attachment_ids)
         .where(container_type: 'Issue', container_id: @issue.id)
         .update_all(private: true)
     end
