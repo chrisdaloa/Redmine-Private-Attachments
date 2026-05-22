@@ -11,4 +11,5 @@ end
 Rails.configuration.to_prepare do
   load File.join(__dir__, 'lib/redmine_private_attachments/issues_controller_patch.rb')
   load File.join(__dir__, 'lib/redmine_private_attachments/attachments_controller_patch.rb')
+  load File.join(__dir__, 'lib/redmine_private_attachments/journal_patch.rb')
 end
